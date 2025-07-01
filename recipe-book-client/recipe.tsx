@@ -56,7 +56,39 @@ const recipes: recipe[] = [
         title: "Chorrizo Hamburger",
         description: "bread, mustard, chorrizo, meat patty, pickles, lettuce",
         picture: '/healthy-pizza.jpg'
-    }
+    },
+
+  {
+    id: 7,
+    price: 5.00,
+    title: "chili dog",
+    description: "chili, hotdog, mustard, bread",
+    picture: '/healthy-pizza.jpg'
+  },
+
+  {
+    id: 8,
+    price: 1.50,
+    title: "muffin",
+    description: "milk, egg, bread",
+    picture: '/healthy-pizza.jpg'
+  },
+
+  {
+    id: 9,
+    price: 5.00,
+    title: "chili dog",
+    description: "chili, hotdog, mustard, bread",
+    picture: '/healthy-pizza.jpg'
+  },
+
+  {
+    id: 10,
+    price: 1.50,
+    title: "muffin",
+    description: "milk, egg, bread",
+    picture: '/healthy-pizza.jpg'
+  },
 ]
 
 export default recipes;
