@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+import React, {useEffect, useState} from 'react';
 import AddRecipe from '../components/AddRecipe';
 import recipes from "@/recipe";
 import Image from "next/image";
@@ -8,6 +9,12 @@ interface Props {
 }
 
 const Page = () => {
+  const [arr, setArr] = useState(recipes);
+
+  useEffect(() => {
+   console.log(1)
+  }, [arr])
+
   return (
     <div className='flex flex-row p-4 h-[87vh]'>
       <div className="w-[30%]  h-full overflow-y-scroll scrollbar-none">

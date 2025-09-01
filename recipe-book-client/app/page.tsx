@@ -1,6 +1,8 @@
+'use client';
 import Image from "next/image";
 //import pizza from '../public/healthy-pizza.jpg';
 import recipes from '../recipe';
+import {useEffect, useState} from "react";
 
 export default function Home() {
   return (

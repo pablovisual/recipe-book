@@ -58,11 +58,9 @@ const AddRecipe = () => {
     reader.readAsDataURL(e.target.files[0]);
 
     reader.onload = () => {
-      console.log(reader.result);
-
+      //console.log(reader.result);
       //set the image with reader.result->string
       setImage(reader?.result);
-
     };
 
     setError("");
@@ -86,14 +84,13 @@ const AddRecipe = () => {
 
     if(Math.floor(parseInt(time) / 60) == 0) {
       const min:string = (parseInt(time) % 60).toString();
-      console.log(`Title: ${ title } \nCooking time: ${ min } minutes\n Ingredients:\n${ ingredients } \nDescription: ${ description }`);
+      console.log(`Title: ${ title } \nCooking time: ${ min } minutes\n Ingredients:\n${ ingredients } \nDescription: ${ description }\n Image: ${ image }`);
     }
 
     else {
       const cookingTime:String = `${ (Math.floor(parseInt(time) / 60)).toString() } hours ${ (parseInt(time) % 60).toString() } minutes`;
-      console.log(`Title: ${ title } \nCooking time: ${ cookingTime } \nIngredients:\n${ ingredients } \nDescription: ${ description }`);
+      console.log(`Title: ${ title } \nCooking time: ${ cookingTime } \nIngredients:\n${ ingredients } \nDescription: ${ description }\n Image: ${ image }`);
     }
-
   }
 
   return (
