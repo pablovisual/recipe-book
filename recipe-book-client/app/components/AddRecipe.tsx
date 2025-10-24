@@ -7,11 +7,13 @@ import { useForm } from 'react-hook-form';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input";
+import { UserAuth } from "../context/AuthContext";
 
 interface RecipeData {
   title: string,
   time: string,
   ingredients: string,
+  instructions: string,
   description: string,
 }
 
@@ -19,12 +21,14 @@ const recipeSchema = z.object({
   title: z.string().min(6, { message: 'Must have a name for your dish.'}),
   time: z.string().min(1, { message: 'Must give a set cook time.'}).max(999, { message: 'Can\'t be that long of cooking time.'}).refine(val => !isNaN(parseInt(val)), { message: 'That\'s not a number.'}),
   ingredients: z.string().min(10, { message: 'Must type out ingredients.'}),
+  instructions: z.string().min(10, { message: 'Must type out instructions.'}),
   description: z.string().min(10, { message: 'Must give a description.' }),
 });
 
 const AddRecipe = () => {
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
+  const { user } = UserAuth();
 
   const { register, handleSubmit, formState: { errors } } = useForm<RecipeData>({
     resolver: zodResolver(recipeSchema),
@@ -32,6 +36,7 @@ const AddRecipe = () => {
       title: '',
       time: '',
       ingredients: '',
+      instructions: '',
       description: '',
     },
     mode: "onChange"
@@ -69,8 +74,8 @@ const AddRecipe = () => {
       console.log(`Error: ${error}`);
     }
   }
-  const createRecipe = (data:  RecipeData) => {
-    const { title, time, ingredients, description } = data;
+  const createRecipe = async (data:  RecipeData) => {
+    const { title, time, ingredients, instructions, description } = data;
 
     //if error useState is not empty then return nothing
     if(error.length > 0)
@@ -82,14 +87,59 @@ const AddRecipe = () => {
       return;
     }
 
+    const ingredientList:string[] = ingredients.replace(/\n/g, ',').split(',').map(value => {
+      return value.trim();
+    });
+
+
     if(Math.floor(parseInt(time) / 60) == 0) {
-      const min:string = (parseInt(time) % 60).toString();
-      console.log(`Title: ${ title } \nCooking time: ${ min } minutes\n Ingredients:\n${ ingredients } \nDescription: ${ description }\n Image: ${ image }`);
+      const cookingTime:string = (parseInt(time) % 60).toString();
+      try {
+        const response = await fetch('http://localhost:8080/recipes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            recipeTitle: title,
+            ingredients: ingredientList,
+            description: description,
+            cookTime: cookingTime,
+            cookInstructions: instructions,
+            recipeImage: image,
+            user_id: user.uid}),
+        }).catch(error => { console.log(error); return;});
+      }
+
+      catch (error) {
+        console.log(error);
+      }
     }
 
     else {
       const cookingTime:String = `${ (Math.floor(parseInt(time) / 60)).toString() } hours ${ (parseInt(time) % 60).toString() } minutes`;
-      console.log(`Title: ${ title } \nCooking time: ${ cookingTime } \nIngredients:\n${ ingredients } \nDescription: ${ description }\n Image: ${ image }`);
+      try {
+        const response = await fetch('http://localhost:8080/recipes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            recipeTitle: title,
+            ingredients: ingredientList,
+            description: description,
+            cookTime: cookingTime,
+            cookInstructions: instructions,
+            recipeImage: image,
+            user_id: user.uid}),
+        }).catch(error => { console.log(error); return;});
+      }
+
+      catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -106,6 +156,10 @@ const AddRecipe = () => {
       <div>
         <Textarea placeholder="Make an ingredients list by new lines or commas." {...register('ingredients')} />
         {errors.ingredients && <p className='text-red-500 text-sm mt-1'>{errors.ingredients.message}</p>}
+      </div>
+      <div>
+        <Textarea placeholder="Jot down the instructions." {...register('instructions')} />
+        {errors.instructions && <p className='text-red-500 text-sm mt-1'>{errors.instructions.message}</p>}
       </div>
       <div>
         <Textarea placeholder="Type the description on preparing the recipe." {...register('description')} />

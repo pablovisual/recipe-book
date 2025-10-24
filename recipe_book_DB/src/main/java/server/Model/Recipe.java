@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "recipes")
 public class Recipe {
   private String recipeTitle;
-  private String ingredients;
+  private String[] ingredients;
   private String description;
   private String cookTime;
   private String cookInstructions;

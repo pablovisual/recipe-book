@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import server.Model.User;
 import server.Service.UserService;
 
+
 @RestController
 @RequestMapping("/register")
 public class UserController {
@@ -19,18 +20,20 @@ public class UserController {
   private MongoTemplate mongoTemplate;
 
   @PostMapping
+  @CrossOrigin(origins = "http://localhost:3000")
   public ResponseEntity<User> createUser(@RequestBody User user) {
     try {
       final Query query = new Query(Criteria.where("email").is(user.getEmail()));
 
-      System.out.println(mongoTemplate.findOne(query, User.class));
       if(mongoTemplate.findOne(query, User.class) != null)
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
       User newUser = new User(
+        user.get_id(),
         user.getEmail()
       );
 
+      System.out.println(HttpStatus.OK);
       return new ResponseEntity<>(userService.createUser(newUser), HttpStatus.CREATED);
     }
 
