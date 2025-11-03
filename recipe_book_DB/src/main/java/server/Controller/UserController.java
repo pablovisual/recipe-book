@@ -2,6 +2,7 @@ package server.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,4 +43,14 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
     }
   }
+
+  /*@GetMapping
+  public ResponseEntity<User> getAllRecipesByUserIDByLookUp(@RequestBody User user) {
+    LookupOperation lookupOperation = LookupOperation.newLookup()
+      .from("recipes")
+      .localField("_id")
+      .foreignField("user_id")
+      .as("user's_recipes");
+    return null;
+  }*/
 }
