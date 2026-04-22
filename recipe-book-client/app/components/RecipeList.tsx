@@ -1,7 +1,7 @@
 'use client';
 import React, {useEffect, useState} from 'react';
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {
   Item,
   ItemContent,
@@ -16,7 +16,7 @@ import {Spinner} from "@/components/ui/spinner";
 import {PiPencilSimple} from "react-icons/pi";
 import {BsTrash3} from "react-icons/bs";
 import {FaRegCheckCircle} from "react-icons/fa";
-import { MdOutlineCancel } from "react-icons/md";
+import {MdOutlineCancel} from "react-icons/md";
 
 interface Recipe {
   _id: string;
@@ -24,8 +24,8 @@ interface Recipe {
   recipeImage: string;
   cookTime: string;
   description: string;
-  ingredients: string[];
   cookInstructions: string;
+  recipeSlug: string;
 }
 
 interface RecipeListProps {
@@ -38,6 +38,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState(false);
   const [updateByUID, setUpdateByUID] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState("");
   const [deleteByUID, setDeleteByUID] = useState("");
   const [error, setError] = useState("");
 
@@ -76,10 +77,11 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
     setRecipeTitle(recipeTitle);
     setCookTime(cookTime);
     setDescription(description);
+    setConfirmDelete("");
     return;
   }
 
-  const editRecipe = (recipeUID: string, recipeTitle: string, cookTime: string, description: string) =>  async () => {
+  const editRecipe = (recipeUID: string, title: string, time: string, description: string) => async () => {
     setEdit(true);
 
     try {
@@ -89,17 +91,15 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipeTitle,
-          cookTime,
-          description
+          recipeTitle: title,
+          description: description,
+          cookTime: time,
         })
       });
 
       if (!response.ok) {
         throw Error(response.statusText);
-      }
-
-      else if(response.status === 202) {
+      } else if (response.status === 202) {
         setError("");
         setUpdateByUID("");
         setEdit(false);
@@ -111,10 +111,15 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       console.log(err);
       setError("Failed to update recipe");
     } finally {
-      getUsersRecipes();
+      await getUsersRecipes();
       setUpdateByUID("");
       setEdit(false);
     }
+  }
+
+  const deletionCheck = (recipeID: string) => {
+    setConfirmDelete(recipeID);
+    return;
   }
 
   const deleteRecipe = (recipeUID: string) => async () => {
@@ -138,6 +143,8 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       setError("Failed to delete recipe");
     } finally {
       getUsersRecipes();
+      setUpdateByUID("");
+      setConfirmDelete("");
     }
   }
 
@@ -178,7 +185,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
           <Item key={recipe._id} variant="outline">
             <ItemHeader className="cursor-pointer">
               <Image
-                onClick={() => router.push("/recipes/" + recipe._id)}
+                onClick={() => router.push("/recipes/recipe/" + recipe.recipeSlug)}
                 src={recipe.recipeImage}
                 alt={recipe.recipeTitle}
                 width={500}
@@ -189,9 +196,11 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
             {updateByUID === recipe._id ? (
               <>
                 <ItemContent>
-                  <Input value={recipeTitle} type="text" placeholder="Recipe Title" onChange={(e) => (setRecipeTitle(e.currentTarget.value))}/>
+                  <Input value={recipeTitle} type="text" placeholder="Recipe Title"
+                         onChange={(e) => (setRecipeTitle(e.currentTarget.value))}/>
                   <Input value={cookTime} placeholder="Time" onChange={(e) => (setCookTime(e.currentTarget.value))}/>
-                  <Input value={description} placeholder="Description" onChange={(e) => (setDescription(e.currentTarget.value))}/>
+                  <Input value={description} placeholder="Description"
+                         onChange={(e) => (setDescription(e.currentTarget.value))}/>
                 </ItemContent>
 
                 <ItemFooter className="flex justify-start">
@@ -201,19 +210,34 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
                     </Button>
                   ) : (
                     <>
-                      <Button title="Save" onClick={editRecipe(recipe._id, recipeTitle, cookTime, description)} variant='ghost' className="rounded-full" size={"icon"}>
+                      <Button title="Save" onClick={editRecipe(recipe._id, recipeTitle, cookTime, description)}
+                              variant='ghost' className="rounded-full" size={"icon"}>
                         <FaRegCheckCircle className="text-green-500"/>
                       </Button>
 
-                      <Button title="Cancel" onClick={() => setUpdateByUID("")} variant='ghost' className="rounded-full " size={"icon"}>
+                      <Button title="Cancel" onClick={() => { setUpdateByUID(""); setConfirmDelete("")}} variant='ghost'
+                              className="rounded-full " size={"icon"}>
                         <MdOutlineCancel className="text-red-500"/>
                       </Button>
                     </>
                   )}
 
-                  <Button title="Delete" onClick={deleteRecipe(recipe._id)} size={"icon"} variant={"ghost"} className="rounded-full">
-                    {deleteByUID === recipe._id ? (<Spinner/>) : (<BsTrash3 />)}
-                  </Button>
+                  {confirmDelete === recipe._id ? (
+                    <>
+                      <Button title="Delete" variant="destructive" className="uppercase rounded-full">
+                        {deleteByUID === recipe._id ? (<>Deleting <Spinner/></>) : (<>Delete</>)}
+                      </Button>
+
+                      <Button onClick={() => { setConfirmDelete(""); setUpdateByUID("")} } title="Cancel" variant="secondary" className="uppercase rounded-full">
+                        cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => deletionCheck(recipe._id)} title="Delete" size={"icon"} variant={"ghost"}
+                            className="rounded-full hover:text-red-500">
+                      <BsTrash3/>
+                    </Button>
+                  )}
                 </ItemFooter>
               </>
             ) : (
@@ -225,13 +249,28 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
                 </ItemContent>
 
                 <ItemFooter className="flex justify-start">
-                  <Button title="Edit" onClick={() => editAction(recipe._id, recipe.recipeTitle, recipe.cookTime, recipe.description)/*() => setUpdateByUID((recipe._id))*/} variant='ghost' className="rounded-full" size={"icon"}>
+                  <Button title="Edit"
+                          onClick={() => editAction(recipe._id, recipe.recipeTitle, recipe.cookTime, recipe.description)/*() => setUpdateByUID((recipe._id))*/}
+                          variant='ghost' className="rounded-full" size={"icon"}>
                     <PiPencilSimple/>
                   </Button>
 
-                  <Button title="Delete" size={"icon"} variant={"ghost"} className="rounded-full">
-                    {deleteByUID === recipe._id ? (<Spinner/>) : (<BsTrash3/>)}
-                  </Button>
+                  {confirmDelete === recipe._id ? (
+                    <>
+                      <Button title="Delete" variant="destructive" className="uppercase rounded-full">
+                        {deleteByUID === recipe._id ? (<>Deleting <Spinner/></>) : (<>Delete</>)}
+                      </Button>
+
+                      <Button onClick={() => setConfirmDelete("")} title="Cancel" variant="secondary" className="uppercase rounded-full">
+                        cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => deletionCheck(recipe._id)} title="Delete" size={"icon"} variant={"ghost"}
+                            className="rounded-full hover:text-red-500">
+                      <BsTrash3/>
+                    </Button>
+                  )}
                 </ItemFooter>
               </>
             )}

@@ -20,5 +20,6 @@ public class Recipe {
   private String cookTime;
   private String cookInstructions;
   private String recipeImage;
+  private String recipeSlug;
   private String user_id;
 }

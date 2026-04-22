@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { randomBytes } from "crypto";
 import { z } from "zod/v4";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,6 +91,10 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
 
     const cookingTime: string = `${(Math.floor(parseInt(time) / 60)).toString()} hours ${(parseInt(time) % 60).toString()} minutes`;
 
+    const randomCharacterString: String = randomBytes(2).toString('hex');
+    const baseSlug: string = title.toLowerCase().replace(/\s+/g, '-');
+
+    const newSlug: string = `${baseSlug}-${randomCharacterString}`;
 
     try {
       const response = await fetch('http://localhost:8080/recipes', {
@@ -104,6 +109,7 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
           cookTime: cookingTime,
           cookInstructions: instructions,
           recipeImage: image,
+          recipeSlug: newSlug,
           user_id: userId
         }),
       });
