@@ -27,9 +27,11 @@ const recipeSchema = z.object({
 interface AddRecipeProps {
   userId: string;
   onRecipeAdded: () => void; // Callback to refresh recipe list
+  onClose?: () => void; // Optional: called after a successful add (useful for closing modals)
+  isModal?: boolean; // When true, force show the component (used when rendering inside a modal on mobile)
 }
 
-const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
+const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded, onClose, isModal }) => {
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,14 +116,16 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
         }),
       });
 
-      if (response.ok) {
-        // Reset form on success
-        reset();
-        setImage("");
-        setError("");
-        // Trigger callback to refresh recipe list
-        onRecipeAdded();
-      }
+          if (response.ok) {
+            // Reset form on success
+            reset();
+            setImage("");
+            setError("");
+            // Trigger callback to refresh recipe list
+            onRecipeAdded();
+            // If consumer passed an onClose (for example a mobile modal), call it
+            if (typeof (onClose) === 'function') onClose();
+          }
     } catch (error) {
       console.log(error);
       setError('Failed to add recipe. Please try again.');
@@ -130,8 +134,12 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
     }
   }
 
+  // When rendered normally: hidden on small screens and visible from md-up as a sidebar.
+  // When used inside a modal (isModal=true) we force it to display full-width so the modal shows the form on mobile.
+  const containerClass = isModal ? 'block w-full h-full overflow-y-auto scrollbar-none' : 'hidden md:block md:w-[30%] h-full overflow-y-scroll scrollbar-none';
+
   return (
-    <div className="w-[30%] h-full overflow-y-scroll scrollbar-none">
+    <div className={containerClass}>
       <form onSubmit={handleSubmit(createRecipe)} className='p-4 space-y-5 h-[80vh] flex flex-col justify-center'>
         <div className="space-y-2">
           <Input className='w-full outline-none' placeholder="Recipe name" {...register('title')} />
@@ -161,7 +169,8 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded }) => {
         <Button
           type="submit"
           variant='outline'
-          className="rounded-full bg-blue-700 text-white text-xl p-4 w-1/4 uppercase primary float-right"
+          // Make the button full width on small screens (good for modal), but compact on md+
+          className="rounded-full bg-blue-700 text-white text-xl p-4 w-full md:w-1/4 uppercase primary float-right"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Adding...' : 'Add'}

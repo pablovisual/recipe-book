@@ -16,11 +16,7 @@ import {
 import {Skeleton} from "@/components/ui/skeleton";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
-import recipe from "@/recipe";
 import {Spinner} from "@/components/ui/spinner";
-import {FaRegCheckCircle} from "react-icons/fa";
-import {MdOutlineCancel} from "react-icons/md";
-import {BsTrash3} from "react-icons/bs";
 
 interface Recipe {
   _id: string;
@@ -93,7 +89,8 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to get recipe');
+        return;
       }
 
       const user_data = await response.json();
@@ -121,7 +118,7 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
   const editRecipe = (recipeUID: string, title: string, time: string, image: string, ingredients: string, instructions: string) => async () => {
     setEdit(true);
 
-    let newIngredientList: string[] = [];
+    let newIngredientList: string[];
 
     if(ingredients != data?.ingredients?.toString()) {
       console.log("hi");
@@ -153,7 +150,9 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to update recipe');
+        setEdit(false);
+        return;
       } else if (response.status === 202) {
         setError("");
         setUpdateByUID("");
@@ -188,7 +187,8 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to delete recipe');
+        return;
       }
 
       setError("");
@@ -215,10 +215,12 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
 
   if (loading) {
     return (
-      <div className="grid place-items-center h-screen">
-        <Card className='pt-0'>
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Card className='w-full max-w-[500px] pt-0'>
           <CardContent className='px-0'>
-            <Skeleton className="aspect-video w-[500] h-[500]"/>
+            <div className="w-full aspect-square relative overflow-hidden rounded-t-xl">
+              <Skeleton className="w-full h-full" />
+            </div>
           </CardContent>
           <CardHeader>
             <Skeleton className="h-4 w-1/2"/>
@@ -234,16 +236,18 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
   }
 
   return (
-    <div className="grid place-items-center h-screen">
-      <Card className='w-[500]'>
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <Card className='w-full max-w-[500px]'>
         <CardContent className='pb-0 pt-6'>
-          <Image
-            src={data?.recipeImage || null || "/placeholder.png"}
-            alt={data?.recipeTitle || "Recipe Image"}
-            width={500}
-            height={500}
-            className="rounded-t-xl"
-          />
+          <div className="w-full aspect-square relative overflow-hidden rounded-t-xl">
+            <Image
+              src={data?.recipeImage || "/placeholder.png"}
+              alt={data?.recipeTitle || "Recipe Image"}
+              fill
+              sizes="(max-width: 640px) 100vw, 500px"
+              className="object-cover"
+            />
+          </div>
         </CardContent>
         {updateByUID === data?._id ? (
           <>

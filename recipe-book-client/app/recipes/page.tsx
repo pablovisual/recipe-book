@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from "next/link";
 import { UserAuth } from "../context/AuthContext";
 import AddRecipe from '../components/AddRecipe';
+import MobileAddRecipeModal from '../components/MobileAddRecipeModal';
 import RecipeList from '../components/RecipeList';
 
 const Page = () => {
@@ -29,14 +30,24 @@ const Page = () => {
         <p>Loading...</p>
       ) : user ? (
         <>
+          {/* Desktop/tablet: show sidebar AddRecipe */}
+
           <AddRecipe
-            userId={user.uid}
-            onRecipeAdded={handleRecipeAdded}
-          />
-          <RecipeList
-            userId={user.uid}
-            refreshTrigger={refreshTrigger}
-          />
+              userId={user.uid}
+              onRecipeAdded={handleRecipeAdded}
+            />
+
+
+          {/* Mobile: use a modal/popup component that contains AddRecipe */}
+          <MobileAddRecipeModal userId={user.uid} onRecipeAdded={handleRecipeAdded} />
+
+          {/* Recipe list fills remaining space */}
+
+            <RecipeList
+              userId={user.uid}
+              refreshTrigger={refreshTrigger}
+            />
+
         </>
       ) : (
         <div className="flex items-center justify-center w-full h-screen">

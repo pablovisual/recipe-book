@@ -1,5 +1,5 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import Image from "next/image";
 import {useRouter} from 'next/navigation';
 import {
@@ -35,7 +35,7 @@ interface RecipeListProps {
 
 const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
   const [data, setData] = useState<Recipe[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState(true);
   const [edit, setEdit] = useState(false);
   const [updateByUID, setUpdateByUID] = useState("");
   const [confirmDelete, setConfirmDelete] = useState("");
@@ -58,7 +58,8 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to load recipes');
+        return;
       }
 
       const user_data = await response.json();
@@ -98,7 +99,9 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to update recipe');
+        setEdit(false);
+        return;
       } else if (response.status === 202) {
         setError("");
         setUpdateByUID("");
@@ -122,7 +125,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
     return;
   }
 
-  const deleteRecipe = (recipeUID: string) => async () => {
+  const deleteRecipe = async (recipeUID: string) => {
     setDeleteByUID(recipeUID);
 
     try {
@@ -134,7 +137,8 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       });
 
       if (!response.ok) {
-        throw Error(response.statusText);
+        setError(response.statusText || 'Failed to delete recipe');
+        return;
       }
 
       setError("");
@@ -142,7 +146,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
       console.log(err);
       setError("Failed to delete recipe");
     } finally {
-      getUsersRecipes();
+      await getUsersRecipes();
       setUpdateByUID("");
       setConfirmDelete("");
     }
@@ -156,7 +160,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
 
   if (loading) {
     return (
-      <div className="w-[70%] flex items-center justify-center">
+      <div className="w-full md:w-[70%] flex items-center justify-center">
         <p className="text-xl">Loading recipes...</p>
       </div>
     );
@@ -164,7 +168,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
 
   if (error) {
     return (
-      <div className="w-[70%] flex items-center justify-center">
+      <div className="w-full md:w-[70%] flex items-center justify-center">
         <p className="text-xl text-red-500">{error}</p>
       </div>
     );
@@ -172,15 +176,16 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-[70%] flex items-center justify-center">
+      <div className="w-full md:w-[70%] flex items-center justify-center">
         <p className="text-xl text-gray-500">No recipes yet. Add your first recipe!</p>
+
       </div>
     );
   }
 
   return (
     <div className="flex w-full max-w-[80rem] flex-col gap-6 overflow-auto scrollbar-none p-4">
-      <ItemGroup className="grid grid-cols-3 gap-4">
+      <ItemGroup className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl mx-auto">
         {data.map((recipe) => (
           <Item key={recipe._id} variant="outline">
             <ItemHeader className="cursor-pointer">
@@ -224,7 +229,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
 
                   {confirmDelete === recipe._id ? (
                     <>
-                      <Button title="Delete" variant="destructive" className="uppercase rounded-full">
+                      <Button onClick={() => deleteRecipe(recipe._id)} title="Delete" variant="destructive" className="uppercase rounded-full">
                         {deleteByUID === recipe._id ? (<>Deleting <Spinner/></>) : (<>Delete</>)}
                       </Button>
 
@@ -257,7 +262,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
 
                   {confirmDelete === recipe._id ? (
                     <>
-                      <Button title="Delete" variant="destructive" className="uppercase rounded-full">
+                      <Button onClick={() => deleteRecipe(recipe._id)} title="Delete" variant="destructive" className="uppercase rounded-full">
                         {deleteByUID === recipe._id ? (<>Deleting <Spinner/></>) : (<>Delete</>)}
                       </Button>
 
