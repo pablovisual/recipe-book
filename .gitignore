@@ -1,5 +1,8 @@
+# Environment variables
+.env
+.env*
+
 # recipe_book_DB (Backend) ignores
-recipe_book_DB/.env
 recipe_book_DB/target/
 recipe_book_DB/.idea/
 recipe_book_DB/node_modules/
