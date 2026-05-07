@@ -99,7 +99,7 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded, onClose, i
     const newSlug: string = `${baseSlug}-${randomCharacterString}`;
 
     try {
-      const response = await fetch('http://localhost:8080/recipes', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

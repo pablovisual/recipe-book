@@ -27,7 +27,7 @@ export const AuthContextProvider = ({children}) => {
   const githubAccount = async () => {
     const provider = new GithubAuthProvider();
     signInWithPopup(auth, provider).then(async (result) => {
-      const response = await fetch('http://localhost:8080/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export const AuthContextProvider = ({children}) => {
       provider.addScope('email');
       signInWithPopup(auth, provider).then(async (result) => {
         //const googleCredentials = GoogleAuthProvider.credentialFromResult(result);
-        const response = await fetch('http://localhost:8080/register', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export const AuthContextProvider = ({children}) => {
 
       setUser({...userCredential.user});
 
-      const response = await fetch('http://localhost:8080/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export const AuthContextProvider = ({children}) => {
         body: JSON.stringify({_id: userCredential.user.uid, email: email})
       });
 
-      if (!response.ok) {
+      if (response.status === 502) {
         throw new Error('Network response was not ok');
         await signOut(auth);
         return response.status;

@@ -7,12 +7,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAgfuaBtEGyy8-bpPsf99aN-_AmQD0tx44",
-    authDomain: "recipe-book-fabf2.firebaseapp.com",
-    projectId: "recipe-book-fabf2",
-    storageBucket: "recipe-book-fabf2.firebasestorage.app",
-    messagingSenderId: "917383292640",
-    appId: "1:917383292640:web:c23933b73e0dad9ebd9285"
+    apiKey: `${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
+    authDomain: `${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`,
+    projectId: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
+    storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`,
+    messagingSenderId: `${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}`,
+    appId: `${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}`,
 };
 
 // Initialize Firebase

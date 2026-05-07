@@ -88,7 +88,7 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
   const getRecipeByRecipeSlug = async () => {
     try {
       setRecipeLoading(true);
-      const response = await fetch(`http://localhost:8080/recipes/recipe/${recipeSlug}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/recipe/${recipeSlug}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
       time = `${(Math.floor(parseInt(cookTime) / 60)).toString()} hours ${(parseInt(cookTime) % 60).toString()} minutes`;
     }
     try {
-      const response = await fetch(`http://localhost:8080/recipes/recipe/${recipeUID}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/recipe/${recipeUID}`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
     setDeleteByUID(recipeUID);
 
     try {
-      const response = await fetch(`http://localhost:8080/recipes/${recipeUID}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/${recipeUID}`, {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json',

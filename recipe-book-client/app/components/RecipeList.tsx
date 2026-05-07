@@ -50,7 +50,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
   const getUsersRecipes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/recipes/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/${userId}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
     setEdit(true);
 
     try {
-      const response = await fetch(`http://localhost:8080/recipes/${recipeUID}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/${recipeUID}`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const RecipeList: React.FC<RecipeListProps> = ({userId, refreshTrigger}) => {
     setDeleteByUID(recipeUID);
 
     try {
-      const response = await fetch(`http://localhost:8080/recipes/${recipeUID}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recipes/${recipeUID}`, {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json',
