@@ -31,7 +31,7 @@ const signUpSchema = z.object({
 });
 
 
-const page: React.FC = () => {
+const Page: React.FC = () => {
   const {emailAndPasswordRegister, githubAccount, googleAccount} = UserAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,7 +107,7 @@ const page: React.FC = () => {
               />
               {errors?.password && <span className="text-red-500">{errors?.password.message}</span>}
             </div>
-            <Button type="submit" className="w-full rounded-full">
+            <Button onClick={() => setIsSubmitting(true)} type="submit" className="w-full rounded-full">
               {isSubmitting ? "Logging in..." : "Sign In"}
             </Button>
           </form>
@@ -140,4 +140,4 @@ const page: React.FC = () => {
     </div>
   );
 };
-export default page;
+export default Page;

@@ -27,18 +27,26 @@ export const AuthContextProvider = ({children}) => {
   const githubAccount = async () => {
     const provider = new GithubAuthProvider();
     signInWithPopup(auth, provider).then(async (result) => {
+    //@ts-ignore
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-
         body: JSON.stringify({_id: result.user.uid, email: result.user.providerData[0].email}),
       });
+
+      // If the fetch completed but returned a non-2xx status, throw to be handled in the catch below.
+      if (!response.ok) {
+        throw new Error(`Registration failed (${response.status} ${response.statusText})`);
+      }
     }).catch((error) => {
       const errorCode = error.code;
+      signOut(auth);
       console.log(errorCode);
     });
+
+
   }
 
   const loginGoogleAccount = () => {
@@ -55,14 +63,17 @@ export const AuthContextProvider = ({children}) => {
       provider.addScope('email');
       signInWithPopup(auth, provider).then(async (result) => {
         //const googleCredentials = GoogleAuthProvider.credentialFromResult(result);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}register`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-
           body: JSON.stringify({_id: result.user.uid, email: result.user.providerData[0].email}),
         });
+
+        if (!response.ok) {
+          throw new Error(`Registration failed (${response.status} ${response.statusText})`);
+        }
       }).catch((error) => {
         const errorCode = error.code;
         return Promise.reject(errorCode);
@@ -93,21 +104,20 @@ export const AuthContextProvider = ({children}) => {
         body: JSON.stringify({_id: userCredential.user.uid, email: email})
       });
 
-      if (response.status === 502) {
-        throw new Error('Network response was not ok');
-        await signOut(auth);
-        return response.status;
-      }
+     if (!response.ok) {
+       // Log and return early instead of throwing (we're already inside try/catch)
+       console.error(`Registration failed (${response.status} ${response.statusText})`);
+       return;
+     }
 
       await signOut(auth); //sign out user after email verification sent
-      return response.status;
     } catch (error) {
       console.log(error.message);
     }
   };
 
-  const logOut = () => {
-    signOut(auth);
+  const logOut = async () => {
+    await signOut(auth);
   }
 
   useEffect(() => {

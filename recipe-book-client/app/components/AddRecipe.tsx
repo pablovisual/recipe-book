@@ -48,31 +48,34 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded, onClose, i
     mode: "onChange"
   });
 
-  const getImage = (e: any) => {
-    const img = e.target.files[0];
+  const getImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!img.name.match(/\.(bpm|jpg|jpeg|png|svg|tif|tiff|webp)$/)) {
+    // validate file type
+    if (!file.name.match(/\.(bmp|jpg|jpeg|png|svg|tif|tiff|webp)$/i)) {
       setError("Wrong file Type!");
       return;
     }
 
-    if (img.size > (1024 * 1024 * 5)) {
-      setError(`File size is ${img.size} which is > than 5MB`);
+    // validate file size (5MB)
+    if (file.size > (1024 * 1024 * 5)) {
+      setError(`File size is ${file.size} which is > than 5MB`);
       return;
     }
 
     const reader = new FileReader();
-    reader.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(file);
 
     reader.onload = () => {
-      setImage(reader?.result as string);
+      setImage(reader.result as string);
+      setError("");
     };
 
-    setError("");
-
-    reader.onerror = error => {
-      console.log(`Error: ${error}`);
-    }
+    reader.onerror = (err) => {
+      console.error('Error reading image file', err);
+      setError('Failed to read image file.');
+    };
   }
 
   const createRecipe = async (data: RecipeData) => {
@@ -93,7 +96,7 @@ const AddRecipe: React.FC<AddRecipeProps> = ({ userId, onRecipeAdded, onClose, i
 
     const cookingTime: string = `${(Math.floor(parseInt(time) / 60)).toString()} hours ${(parseInt(time) % 60).toString()} minutes`;
 
-    const randomCharacterString: String = randomBytes(2).toString('hex');
+    const randomCharacterString: string = randomBytes(2).toString('hex');
     const baseSlug: string = title.toLowerCase().replace(/\s+/g, '-');
 
     const newSlug: string = `${baseSlug}-${randomCharacterString}`;

@@ -58,31 +58,34 @@ const ViewRecipe: React.FC<RecipeProps> = ({recipeSlug}) => {
   const listIngredientsTag = []; //hold the list of ingredients in <li> tag
   //console.log(recipeSlug);
 
-  const updateImage = ( e:any) => {
-    const img = e.target.files[0];
+  const updateImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!img.name.match(/\.(bpm|jpg|jpeg|png|svg|tif|tiff|webp)$/)) {
+    // validate file type
+    if (!file.name.match(/\.(bmp|jpg|jpeg|png|svg|tif|tiff|webp)$/i)) {
       setError("Wrong file Type!");
       return;
     }
 
-    if (img.size > (1024 * 1024 * 5)) {
-      setError(`File size is ${img.size} which is > than 5MB`);
+    // validate file size (5MB)
+    if (file.size > (1024 * 1024 * 5)) {
+      setError(`File size is ${file.size} which is > than 5MB`);
       return;
     }
 
     const reader = new FileReader();
-    reader.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(file);
 
     reader.onload = () => {
-      setImage(reader?.result as string);
+      setImage(reader.result as string);
+      setError("");
     };
 
-    setError("");
-
-    reader.onerror = error => {
-      console.log(`Error: ${error}`);
-    }
+    reader.onerror = (err) => {
+      console.error('Error reading image file', err);
+      setError('Failed to read image file.');
+    };
   }
 
   const getRecipeByRecipeSlug = async () => {

@@ -34,8 +34,8 @@ const loginFormSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
-const page = () => {
-  const {loginGithubAccount, githubAccount, loginGoogleAccount, googleAccount } = UserAuth();
+const Page = () => {
+  const {loginGithubAccount, loginGoogleAccount } = UserAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,7 +71,7 @@ const page = () => {
 
     catch (error) {
       console.error(error);
-    };
+    }
   }
 
   const returningGoogleUser = async () => {
@@ -159,4 +159,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
