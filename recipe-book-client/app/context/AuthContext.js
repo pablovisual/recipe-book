@@ -27,7 +27,6 @@ export const AuthContextProvider = ({children}) => {
   const githubAccount = async () => {
     const provider = new GithubAuthProvider();
     signInWithPopup(auth, provider).then(async (result) => {
-    //@ts-ignore
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
