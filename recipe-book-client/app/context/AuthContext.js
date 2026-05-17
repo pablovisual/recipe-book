@@ -86,32 +86,44 @@ export const AuthContextProvider = ({children}) => {
 
   const emailAndPasswordRegister = async (email, password) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      let userCred;
+       await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+         userCred = userCredential;
 
-      await updateProfile(userCredential.user, {
+         await updateProfile(userCredential.user, {
+           displayName: `${ email.substring(0, email.lastIndexOf("@"))}`
+         });
+
+         setUser(userCredential.user);
+       });
+       
+      /*await updateProfile(userCredential.user, {
         displayName: `${email.substring(0, email.lastIndexOf("@"))}`
       });
 
-      setUser({...userCredential.user});
+      setUser({...userCredential.user});*/
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
 
-        body: JSON.stringify({_id: userCredential.user.uid, email: email})
+        body: JSON.stringify({_id: userCred.user.uid, email: email})
       });
+
+      /*if(response.status === 400)
+        return response.status;
 
      if (!response.ok) {
        // Log and return early instead of throwing (we're already inside try/catch)
        console.error(`Registration failed (${response.status} ${response.statusText})`);
        return;
-     }
+     }*/
 
-      await signOut(auth); //sign out user after email verification sent
+      await signOut(auth);
     } catch (error) {
-      console.log(error.message);
+      return 400;
     }
   };
 

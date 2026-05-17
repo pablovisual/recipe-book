@@ -38,6 +38,7 @@ const Page = () => {
   const {loginGithubAccount, loginGoogleAccount } = UserAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const { register, handleSubmit, formState: { errors } } = useForm<loginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -52,13 +53,14 @@ const Page = () => {
   const returningUser = async (data: loginFormData) => {
     const { email, password } = data;
 
-    console.log(email, password);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
       setIsSubmitting(true);
+      await signInWithEmailAndPassword(auth, email, password);
+
       router.push('/');
     } catch (error) {
-      console.error(error);
+      setError('Invalid email or password');
+      setIsSubmitting(false);
     }
   };
 
@@ -132,6 +134,7 @@ const Page = () => {
             <Button type="submit" className="w-full rounded-full">
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
+            {error && <p className='text-red-500 text-sm mt-1'>{error}</p>}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col -mt-4">

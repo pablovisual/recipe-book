@@ -33,6 +33,7 @@ const signUpSchema = z.object({
 
 const Page: React.FC = () => {
   const {emailAndPasswordRegister, githubAccount, googleAccount} = UserAuth();
+  const [error, setError] = useState("");
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {register, handleSubmit, formState: {errors}} = useForm<FormData>({
@@ -46,14 +47,15 @@ const Page: React.FC = () => {
 
   const signUp = async (data: FormData) => {
     const {email, password} = data;
-    try {
-      await emailAndPasswordRegister(email, password);
+     const responseCode: number = await emailAndPasswordRegister(email, password);
+     if(responseCode === 400) {
+       setError("Email already Exists");
+       setIsSubmitting(false);
+       return;
+     }
       await new Promise(resolve => setTimeout(resolve, 2000));
       router.push('/login');
 
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const githubSignUp = async () => {
@@ -110,6 +112,7 @@ const Page: React.FC = () => {
             <Button onClick={() => setIsSubmitting(true)} type="submit" className="w-full rounded-full">
               {isSubmitting ? "Logging in..." : "Sign In"}
             </Button>
+            {error && <p className='text-red-500 text-sm mt-1'>{error}</p>}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col -mt-4">
